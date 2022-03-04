@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SMS reader</string>
+    <string name="textview">TextView</string>
+    <string name="read_sms">Read SMS</string>
+</resources>
