@@ -1,7 +1,9 @@
 package com.example.smsreader;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +37,11 @@ public class MyReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.i(TAG,"Intent receive: "+intent.getAction());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            NotificationChannel channel = new NotificationChannel("My notification","My notification",NotificationManager.IMPORTANCE_HIGH);
+            NotificationManager manager = context.getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
         if (intent.getAction()==(SMS)){
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
@@ -58,21 +65,23 @@ public class MyReceiver extends BroadcastReceiver {
                     @Override
                     public void onResponse(Call<Result> call, Response<Result> response) {
                         Result result = response.body();
-                        Toast.makeText(context, "Resultado del análisis: " + result.getResult(), Toast.LENGTH_LONG).show();
-                        //NotificationCompat.Builder builder = new NotificationCompat.Builder(context.getApplicationContext(),"NOTIFICATION");
-                        //builder.setSmallIcon(R.drawable.ic_baseline_assignment_late_24);
-                        //builder.setContentTitle("Resultado del análisis");
-                        //builder.setContentText(result.getResult());
-                        //builder.setColor(Color.BLUE);
+                        NotificationCompat.Builder builder = new NotificationCompat.Builder(context.getApplicationContext(),"My notification");
+                        builder.setContentTitle("Resultado del análisis");
+                        if (result.getResult()=="true"){
+                            builder.setContentText("¡Cuidado! podría tratarse de un mensaje malicioso");
+                        }else{
+                            builder.setContentText("Este mensaje se considera seguro");
+                        }
+                        builder.setSmallIcon(R.drawable.ic_baseline_assignment_late_24);
+                        builder.setAutoCancel(true);
 
-                        //NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context.getApplicationContext());
-                        //notificationManagerCompat.notify(0,builder.build());
+                        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context.getApplicationContext());
+                        notificationManagerCompat.notify(1,builder.build());
                     }
 
                     @Override
                     public void onFailure(Call<Result> call, Throwable t) {
                         Log.e(TAG,t.getMessage());
-
                     }
                 });
             }
