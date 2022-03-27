@@ -2,14 +2,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.smsreader">
 
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SMSReader">
+        android:theme="@style/Theme.SMSReader"
+        android:usesCleartextTraffic="true">
+        <meta-data
+            android:name="com.google.android.actions"
+            android:resource="@xml/network_security_config" />
+
         <receiver
             android:name=".MyReceiver"
             android:enabled="true"
@@ -18,7 +26,6 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
-
 
         <activity
             android:name=".MainActivity"
@@ -30,6 +37,5 @@
             </intent-filter>
         </activity>
     </application>
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
 
 </manifest>
