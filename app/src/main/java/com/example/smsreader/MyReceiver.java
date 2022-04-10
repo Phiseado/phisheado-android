@@ -33,6 +33,8 @@ public class MyReceiver extends BroadcastReceiver {
     private static final String SMS = "android.provider.Telephony.SMS_RECEIVED";
     private static final String TAG = "SmsBroadcastReceiver";
     String msg = "";
+    private PendingIntent reportPhishingIntent;
+    private PendingIntent reportNormalMessageIntent;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -57,7 +59,7 @@ public class MyReceiver extends BroadcastReceiver {
                     msg = message[i].getMessageBody();
                 }
                 //In msg we have text of the message
-                Retrofit retrofit = new Retrofit.Builder().baseUrl("http://10.0.2.2:8000/")
+                Retrofit retrofit = new Retrofit.Builder().baseUrl("https://phishing-alert-backend.herokuapp.com/")
                         .addConverterFactory(GsonConverterFactory.create()).build();
                 ResultAPI api = retrofit.create(ResultAPI.class);
                 Call<Result> call = api.analyze(new CallAPI(msg));
@@ -69,6 +71,8 @@ public class MyReceiver extends BroadcastReceiver {
                         builder.setContentTitle("Resultado del análisis");
                         if (result.getResult()=="true"){
                             builder.setContentText("¡Cuidado! podría tratarse de un mensaje malicioso");
+                            builder.addAction(R.drawable.ic_baseline_assignment_late_24, "Denunciar", reportPhishingIntent);
+                            builder.addAction(R.drawable.ic_baseline_assignment_late_24, "No es phishing", reportNormalMessageIntent);
                         }else{
                             builder.setContentText("Este mensaje se considera seguro");
                         }
