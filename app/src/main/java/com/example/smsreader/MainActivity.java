@@ -13,7 +13,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-    private static final int MY_PERMISSIONS_REQUEST_RECEIVE_SMS = 0;
+    private static final int MY_PERMISSIONS_REQUESTS = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,11 +25,16 @@ public class MainActivity extends AppCompatActivity {
             startForegroundService(backgroundService);
         }
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)!= PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECEIVE_SMS)) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)!= PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_NUMBERS)!= PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)!= PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECEIVE_SMS) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_PHONE_NUMBERS) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_PHONE_STATE)) {
 
             } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, MY_PERMISSIONS_REQUEST_RECEIVE_SMS);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_PHONE_NUMBERS, Manifest.permission.READ_PHONE_STATE}, MY_PERMISSIONS_REQUESTS);
             }
         }
     }
@@ -38,11 +43,11 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_RECEIVE_SMS: {
+            case MY_PERMISSIONS_REQUESTS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Thank You for permitting", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Gracias por permitir el acceso", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(this, "Well, I Cant do anything until you permit me :(", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Vaya, no puedo funcionar sin permisos", Toast.LENGTH_LONG).show();
                 }
             }
         }

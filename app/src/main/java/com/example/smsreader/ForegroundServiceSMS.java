@@ -30,6 +30,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ForegroundServiceSMS extends Service {
+    private static final String REPORT_PHISHING = "actionReportPhishing";
+    private static final String REPORT_NORMAL_MESSAGE = "actionNormalMessage";
     private static BroadcastReceiver br_SMSReceiver;
 
     private static final String SMS = "android.provider.Telephony.SMS_RECEIVED";
@@ -56,8 +58,8 @@ public class ForegroundServiceSMS extends Service {
         );
         getSystemService(NotificationManager.class).createNotificationChannel(channel);
         Notification.Builder notification = new Notification.Builder(this, CHANNELID)
-                .setContentText("Service is running")
-                .setContentTitle("SMS Reader")
+                .setContentText("Servicio en ejecución")
+                .setContentTitle("Phishing alert")
                 .setSmallIcon(R.drawable.ic_launcher_foreground);
 
         startForeground(1001, notification.build());
@@ -105,6 +107,18 @@ public class ForegroundServiceSMS extends Service {
                                 NotificationCompat.Builder builder = new NotificationCompat.Builder(context.getApplicationContext(),"My notification");
                                 builder.setContentTitle("Resultado del análisis");
                                 if (result.getResult()=="true"){
+                                    Intent phishingIntent = new Intent(getApplicationContext(), PhishingReceiver.class);
+                                    phishingIntent.setAction(REPORT_PHISHING);
+                                    reportPhishingIntent =
+                                            PendingIntent.getBroadcast(getApplicationContext(), 1,
+                                                    phishingIntent, PendingIntent.FLAG_IMMUTABLE);
+
+                                    Intent normalMessageIntent = new Intent(getApplicationContext(), PhishingReceiver.class);
+                                    phishingIntent.setAction(REPORT_NORMAL_MESSAGE);
+                                    reportNormalMessageIntent =
+                                            PendingIntent.getBroadcast(getApplicationContext(), 1,
+                                                    phishingIntent, PendingIntent.FLAG_IMMUTABLE);
+
                                     builder.setContentText("¡Cuidado! podría tratarse de un mensaje malicioso");
                                     builder.addAction(R.drawable.ic_baseline_assignment_late_24, "Denunciar", reportPhishingIntent);
                                     builder.addAction(R.drawable.ic_baseline_assignment_late_24, "No es phishing", reportNormalMessageIntent);
@@ -128,6 +142,7 @@ public class ForegroundServiceSMS extends Service {
             }
         };
         IntentFilter intentFilter = new IntentFilter();
+        // addAction defines when you want to register the receiver
         intentFilter.addAction("android.provider.Telephony.SMS_RECEIVED");
         registerReceiver(br_SMSReceiver,intentFilter);
 
