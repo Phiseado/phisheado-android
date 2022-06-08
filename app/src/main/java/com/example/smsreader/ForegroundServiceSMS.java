@@ -9,7 +9,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.telephony.SmsMessage;
@@ -20,7 +19,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.smsreader.interfaces.ResultAPI;
-import com.example.smsreader.models.CallAPI;
+import com.example.smsreader.models.CheckMessage;
 import com.example.smsreader.models.Result;
 
 import retrofit2.Call;
@@ -30,15 +29,13 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ForegroundServiceSMS extends Service {
-    private static final String REPORT_PHISHING = "actionReportPhishing";
-    private static final String REPORT_NORMAL_MESSAGE = "actionNormalMessage";
     private static BroadcastReceiver br_SMSReceiver;
 
     private static final String SMS = "android.provider.Telephony.SMS_RECEIVED";
     private static final String TAG = "SmsBroadcastReceiver";
     String msg = "";
-    private PendingIntent reportPhishingIntent;
-    private PendingIntent reportNormalMessageIntent;
+    private static PendingIntent reportPhishingIntent;
+    private static PendingIntent reportNormalMessageIntent;
 
 
     @Nullable
@@ -76,52 +73,52 @@ public class ForegroundServiceSMS extends Service {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Log.i(TAG,"Intent receive: "+intent.getAction());
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                    NotificationChannel channel = new NotificationChannel("My notification","My notification", NotificationManager.IMPORTANCE_HIGH);
-                    NotificationManager manager = context.getSystemService(NotificationManager.class);
-                    manager.createNotificationChannel(channel);
-                }
-                if (intent.getAction()==(SMS)){
+               
+                NotificationChannel channel = new NotificationChannel("My notification","My notification", NotificationManager.IMPORTANCE_HIGH);
+                NotificationManager manager = context.getSystemService(NotificationManager.class);
+                manager.createNotificationChannel(channel);
+                
+                if (intent.getAction().equals(SMS)){
                     Bundle bundle = intent.getExtras();
                     if (bundle != null) {
                         Object[] pdu = (Object[]) bundle.get("pdus");
                         final SmsMessage[] message = new SmsMessage[pdu.length];
                         for (int i = 0; i < pdu.length; i++) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                String format = bundle.getString("format");
-                                message[i] = SmsMessage.createFromPdu((byte[]) pdu[i], format);
-                            } else {
-                                message[i] = SmsMessage.createFromPdu((byte[]) pdu[i]);
-                            }
+                            String format = bundle.getString("format");
+                            message[i] = SmsMessage.createFromPdu((byte[]) pdu[i], format);
+                            
                             msg = message[i].getMessageBody();
                         }
-                        //In msg we have text of the message
-                        Retrofit retrofit = new Retrofit.Builder().baseUrl("https://phishing-alert-backend.herokuapp.com/")
+                        //In msg we have the text of the message
+                        Retrofit retrofit = new Retrofit.Builder().baseUrl("http://10.0.2.2:8000/")
                                 .addConverterFactory(GsonConverterFactory.create()).build();
                         ResultAPI api = retrofit.create(ResultAPI.class);
-                        Call<Result> call = api.analyze(new CallAPI(msg));
+                        Call<Result> call = api.analyze(new CheckMessage(msg));
                         call.enqueue(new Callback<Result>() {
+
                             @Override
                             public void onResponse(Call<Result> call, Response<Result> response) {
                                 Result result = response.body();
                                 NotificationCompat.Builder builder = new NotificationCompat.Builder(context.getApplicationContext(),"My notification");
                                 builder.setContentTitle("Resultado del análisis");
-                                if (result.getResult()=="true"){
-                                    Intent phishingIntent = new Intent(getApplicationContext(), PhishingReceiver.class);
-                                    phishingIntent.setAction(REPORT_PHISHING);
-                                    reportPhishingIntent =
-                                            PendingIntent.getBroadcast(getApplicationContext(), 1,
-                                                    phishingIntent, PendingIntent.FLAG_IMMUTABLE);
 
-                                    Intent normalMessageIntent = new Intent(getApplicationContext(), PhishingReceiver.class);
-                                    phishingIntent.setAction(REPORT_NORMAL_MESSAGE);
+                                if (result!=null && result.getResult().equals("true")){
+                                    Intent phishingIntent = new Intent(getApplicationContext(), PhishingReceiver.class);
+                                    phishingIntent.putExtra("message", msg);
+                                    reportPhishingIntent =
+                                            PendingIntent.getBroadcast(getApplicationContext(), (int) (System.currentTimeMillis() & 0xfffffff),
+                                                    phishingIntent, PendingIntent.FLAG_MUTABLE);
+
+                                    Intent normalMessageIntent = new Intent(getApplicationContext(), NormalMessageReceiver.class);
+                                    normalMessageIntent.putExtra("message", msg);
                                     reportNormalMessageIntent =
-                                            PendingIntent.getBroadcast(getApplicationContext(), 1,
-                                                    phishingIntent, PendingIntent.FLAG_IMMUTABLE);
+                                            PendingIntent.getBroadcast(getApplicationContext(), (int) (System.currentTimeMillis() & 0xfffffff),
+                                                    normalMessageIntent, PendingIntent.FLAG_MUTABLE);
 
                                     builder.setContentText("¡Cuidado! podría tratarse de un mensaje malicioso");
                                     builder.addAction(R.drawable.ic_baseline_assignment_late_24, "Denunciar", reportPhishingIntent);
                                     builder.addAction(R.drawable.ic_baseline_assignment_late_24, "No es phishing", reportNormalMessageIntent);
+
                                 }else{
                                     builder.setContentText("Este mensaje se considera seguro");
                                 }
@@ -129,7 +126,7 @@ public class ForegroundServiceSMS extends Service {
                                 builder.setAutoCancel(true);
 
                                 NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context.getApplicationContext());
-                                notificationManagerCompat.notify(1,builder.build());
+                                notificationManagerCompat.notify(1002,builder.build());
                             }
 
                             @Override

@@ -1,9 +1,9 @@
 package com.example.smsreader.models;
 
-public class CallAPI {
+public class CheckMessage {
     private String message;
 
-    public CallAPI(String message) {
+    public CheckMessage(String message) {
         this.message = message;
     }
 
