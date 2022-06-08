@@ -57,7 +57,7 @@ public class ForegroundServiceSMS extends Service {
         Notification.Builder notification = new Notification.Builder(this, CHANNELID)
                 .setContentText("Servicio en ejecución")
                 .setContentTitle("Phishing alert")
-                .setSmallIcon(R.drawable.ic_launcher_foreground);
+                .setSmallIcon(R.drawable.phishinglogo);
 
         startForeground(1001, notification.build());
         return super.onStartCommand(intent, flags, startId);
@@ -115,7 +115,7 @@ public class ForegroundServiceSMS extends Service {
                                             PendingIntent.getBroadcast(getApplicationContext(), (int) (System.currentTimeMillis() & 0xfffffff),
                                                     normalMessageIntent, PendingIntent.FLAG_MUTABLE);
 
-                                    builder.setContentText("¡Cuidado! podría tratarse de un mensaje malicioso");
+                                    builder.setContentText("¡Cuidado! Podría tratarse de un mensaje malicioso");
                                     builder.addAction(R.drawable.ic_baseline_assignment_late_24, "Denunciar", reportPhishingIntent);
                                     builder.addAction(R.drawable.ic_baseline_assignment_late_24, "No es phishing", reportNormalMessageIntent);
 
