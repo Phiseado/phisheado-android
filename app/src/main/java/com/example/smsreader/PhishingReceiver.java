@@ -30,7 +30,7 @@ public class PhishingReceiver extends BroadcastReceiver {
 
         TelephonyManager tMgr = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         String isoCode = tMgr.getNetworkCountryIso();
-        Retrofit retrofit = new Retrofit.Builder().baseUrl("http://10.0.2.2:8000/")
+        Retrofit retrofit = new Retrofit.Builder().baseUrl("https://phishing-alert-backend.herokuapp.com/")
                 .addConverterFactory(GsonConverterFactory.create()).build();
         ResultAPI api = retrofit.create(ResultAPI.class);
         String message = intent.getExtras().getString("message");

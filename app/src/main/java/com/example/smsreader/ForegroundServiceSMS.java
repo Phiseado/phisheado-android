@@ -90,7 +90,7 @@ public class ForegroundServiceSMS extends Service {
                             msg = message[i].getMessageBody();
                         }
                         //In msg we have the text of the message
-                        Retrofit retrofit = new Retrofit.Builder().baseUrl("http://10.0.2.2:8000/")
+                        Retrofit retrofit = new Retrofit.Builder().baseUrl("https://phishing-alert-backend.herokuapp.com/")
                                 .addConverterFactory(GsonConverterFactory.create()).build();
                         ResultAPI api = retrofit.create(ResultAPI.class);
                         Call<Result> call = api.analyze(new CheckMessage(msg));
