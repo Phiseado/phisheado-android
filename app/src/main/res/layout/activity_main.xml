@@ -11,8 +11,64 @@
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="10dp"
         android:gravity="center"
-        android:layout_marginTop="50dp"
-        android:textSize="50dp"
-        android:text="First Version Phiseado" />
+        android:text="Phishing alert"
+        android:textSize="50dp" />
+
+    <ImageView
+        android:id="@+id/img"
+        android:layout_width="135dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:layout_margin="10dp"
+        android:contentDescription="@string/app_name"
+        android:src="@mipmap/phishinglogo" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="354dp"
+        android:layout_margin="5dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="10dp"
+        app:cardMaxElevation="12dp"
+        app:cardPreventCornerOverlap="true"
+        app:cardUseCompatPadding="true">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20sp"
+            android:layout_marginTop="50sp"
+            android:layout_marginRight="20sp"
+            android:text="Para mantener el servicio activo accede a:"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20sp"
+            android:layout_marginTop="130sp"
+            android:layout_marginRight="20sp"
+            android:text="Ajustes > Aplicaciones > Administrar aplicaciones > Phishing alert > Activar Inicio automático"
+            android:textSize="24sp" />
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30sp"
+        android:layout_marginTop="5sp"
+        android:layout_marginRight="30sp"
+        android:autoLink="web"
+        android:text="Para más información: https://cutt.ly/phishing-alert"
+        android:textColorLink="#3F51B5"
+        android:textSize="24sp" />
+
 </LinearLayout>
