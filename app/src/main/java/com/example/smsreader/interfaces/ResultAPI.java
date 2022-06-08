@@ -9,10 +9,10 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface ResultAPI {
-    @POST("check")
+    @POST("check/")
     Call<Result> analyze(@Body CheckMessage message);
 
-    @POST("report-message")
+    @POST("report-message/")
     Call<Result> reportMessage(@Body ReportMessage body);
 
 }
