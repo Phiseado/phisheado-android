@@ -60,7 +60,7 @@ public class ForegroundServiceSMS extends Service {
                 .setSmallIcon(R.drawable.phishinglogo);
 
         startForeground(1001, notification.build());
-        return super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
     }
 
     @Override
