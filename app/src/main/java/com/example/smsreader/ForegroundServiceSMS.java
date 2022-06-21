@@ -36,7 +36,26 @@ public class ForegroundServiceSMS extends Service {
     String msg = "";
     private static PendingIntent reportPhishingIntent;
     private static PendingIntent reportNormalMessageIntent;
+    private static Integer protectedTimes = 0;
+    final String CHANNELID = "foreground_channel";
 
+    public String discoverReason(String reason) {
+        if (reason.equals("Google API")) {
+            return "La URL está contenida en la lista negra de URL's maliciosas de Google.";
+        } else if (reason.equals("URL model")) {
+            return "Se ha detectado a través de un modelo de Inteligencia Artificial basado en URL's.";
+        } else {
+            return "Se ha detectado a través de un modelo de Inteligencia Artificial basado en el contenido del mensaje.";
+        }
+    }
+
+    public String obtainProtectedTimes() {
+        if (protectedTimes.equals(1)) {
+            return "Has sido protegido en una ocasión.";
+        } else {
+            return "Has sido protegido en " + protectedTimes + " ocasiones.";
+        }
+    }
 
     @Nullable
     @Override
@@ -47,7 +66,6 @@ public class ForegroundServiceSMS extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         registerReceiverSMS();
-        final String CHANNELID = "foreground_channel";
         NotificationChannel channel = new NotificationChannel(
                 CHANNELID,
                 CHANNELID,
@@ -55,8 +73,8 @@ public class ForegroundServiceSMS extends Service {
         );
         getSystemService(NotificationManager.class).createNotificationChannel(channel);
         Notification.Builder notification = new Notification.Builder(this, CHANNELID)
-                .setContentText("Servicio en ejecución")
-                .setContentTitle("Phishing alert")
+                .setContentText("Servicio en ejecución.")
+                .setContentTitle("Phisheado")
                 .setSmallIcon(R.drawable.phishinglogo);
 
         startForeground(1001, notification.build());
@@ -103,6 +121,13 @@ public class ForegroundServiceSMS extends Service {
                                 builder.setContentTitle("Resultado del análisis");
 
                                 if (result!=null && result.getResult().equals("true")){
+                                    protectedTimes += 1;
+                                    Notification.Builder notification = new Notification.Builder(getApplicationContext(), CHANNELID)
+                                            .setContentText(obtainProtectedTimes())
+                                            .setContentTitle("Phisheado")
+                                            .setSmallIcon(R.drawable.phishinglogo);
+
+                                    startForeground(1001, notification.build());
                                     Intent phishingIntent = new Intent(getApplicationContext(), PhishingReceiver.class);
                                     phishingIntent.putExtra("message", msg);
                                     reportPhishingIntent =
@@ -115,7 +140,8 @@ public class ForegroundServiceSMS extends Service {
                                             PendingIntent.getBroadcast(getApplicationContext(), (int) (System.currentTimeMillis() & 0xfffffff),
                                                     normalMessageIntent, PendingIntent.FLAG_MUTABLE);
 
-                                    builder.setContentText("¡Cuidado! Podría tratarse de un mensaje malicioso");
+                                    String message = "¡Cuidado! El SMS " + '"' + msg.substring(0, 25)  + "..." + '"' + " podría ser malicioso. " + discoverReason(result.getReason());
+                                    builder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
                                     builder.addAction(R.drawable.ic_baseline_assignment_late_24, "Denunciar", reportPhishingIntent);
                                     builder.addAction(R.drawable.ic_baseline_assignment_late_24, "No es phishing", reportNormalMessageIntent);
 
