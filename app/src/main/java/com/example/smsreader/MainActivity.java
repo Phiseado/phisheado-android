@@ -20,11 +20,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (!isForegroundServiceRunning()){
-            Intent backgroundService = new Intent(this, ForegroundServiceSMS.class);
-            startForegroundService(backgroundService);
-        }
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)!= PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)!= PackageManager.PERMISSION_GRANTED) {
 
@@ -34,6 +29,11 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_PHONE_STATE}, MY_PERMISSIONS_REQUESTS);
             }
+        }
+
+        if (!isForegroundServiceRunning()){
+            Intent backgroundService = new Intent(this, ForegroundServiceSMS.class);
+            startForegroundService(backgroundService);
         }
     }
 

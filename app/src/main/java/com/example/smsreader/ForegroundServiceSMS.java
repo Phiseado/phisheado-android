@@ -101,12 +101,10 @@ public class ForegroundServiceSMS extends Service {
                     if (bundle != null) {
                         Object[] pdu = (Object[]) bundle.get("pdus");
                         final SmsMessage[] message = new SmsMessage[pdu.length];
-                        for (int i = 0; i < pdu.length; i++) {
-                            String format = bundle.getString("format");
-                            message[i] = SmsMessage.createFromPdu((byte[]) pdu[i], format);
-                            
-                            msg = message[i].getMessageBody();
-                        }
+                        String format = bundle.getString("format");
+                        message[pdu.length - 1] = SmsMessage.createFromPdu((byte[]) pdu[pdu.length - 1], format);
+                        msg = message[pdu.length - 1].getMessageBody();
+
                         //In msg we have the text of the message
                         Retrofit retrofit = new Retrofit.Builder().baseUrl("https://phishing-alert-backend.herokuapp.com/")
                                 .addConverterFactory(GsonConverterFactory.create()).build();
@@ -146,7 +144,7 @@ public class ForegroundServiceSMS extends Service {
                                     builder.addAction(R.drawable.ic_baseline_assignment_late_24, "No es phishing", reportNormalMessageIntent);
 
                                 }else{
-                                    builder.setContentText("Este mensaje se considera seguro");
+                                    builder.setContentText("El SMS " + '"' + msg.substring(0, 25)  + "..." + '"' + " mensaje se considera seguro");
                                 }
                                 builder.setSmallIcon(R.drawable.ic_baseline_assignment_late_24);
                                 builder.setAutoCancel(true);
