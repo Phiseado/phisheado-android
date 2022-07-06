@@ -144,7 +144,8 @@ public class ForegroundServiceSMS extends Service {
                                     builder.addAction(R.drawable.ic_baseline_assignment_late_24, "No es phishing", reportNormalMessageIntent);
 
                                 }else{
-                                    builder.setContentText("El SMS " + '"' + msg.substring(0, 25)  + "..." + '"' + " mensaje se considera seguro");
+                                    String message = "El SMS " + '"' + msg.substring(0, 25)  + "..." + '"' + " mensaje se considera seguro";
+                                    builder.setStyle(new NotificationCompat.BigTextStyle().bigText(message));
                                 }
                                 builder.setSmallIcon(R.drawable.ic_baseline_assignment_late_24);
                                 builder.setAutoCancel(true);
